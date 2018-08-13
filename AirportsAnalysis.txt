@@ -1,0 +1,248 @@
+﻿###MAC: In the future, please save your answers in the /proj folder and not the /scratch file per the instructions!
+
+/290/gp01g5/scratch
+
+1a.  Read a little about the data from the ASA DataExpo 2009:
+http://stat-computing.org/dataexpo/2009/
+
+1b.  Navigate to the scratch directory for your group using the cd command.
+Then use a for loop and the wget command to download the airline data,
+and bzip2 to unzip the data.  Try to understand what these commands are doing.
+
+	for ((x = 1987 ; x <= 2008 ; x++)); do
+	    wget http://stat-computing.org/dataexpo/2009/$x.csv.bz2
+	    bzip2 -d $x.csv.bz2
+	done
+
+2a.  Use the ls command to learn which of the resulting .csv files is biggest in terms of bytes.  How many bytes does this largest file have?
+
+	$ ls -lS
+	702878193 Aug 22  2014 2007.csv
+	2007.csv: 702878193 bytes
+###MAC: 4/4
+
+2b.  Use the wc command to learn which of the resulting .csv files has the most lines.  How many lines does this largest file have?
+
+	$ wc -l *.csv | sort | tail -n1
+	7453216 2007.csv
+	2007.csv: 7453216 lines
+###MAC: 4/4
+
+2c.  Use the cat command to concatenate all of the files together into one big file.  How many lines does this new file have?
+
+	$ cat *.csv | grep -v "Year" > All_Years.txt
+	$ wc -l All_Years.txt
+	123534969 lines
+###MAC: 4/4 
+
+3a.  Use the head command to get information about the first 10 rows of the file.  Pipe the results to the cut command and extract the 17th and 18th fields (using comma as the delimiter), to get information about the first several origin-to-destination pairs.
+
+	$ cat All_Years.txt | head | cut -d, -f17,18
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO	
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO
+	SAN,SFO
+###MAC: No need to cat the file and then take the head. Just take the head as follows: 
+head All_Years.txt cut -d, -f17,18
+4/4
+
+
+3b.  Try the same concept with the tail of the file.
+
+	$ cat *.csv | tail | cut -d, -f17,18
+	ATL,IAH
+	JAX,ATL
+	MSY,ATL
+	GEG,SLC
+	SAV,ATL
+	ATL,IAD
+	ATL,SAT
+	PBI,ATL
+	IAD,ATL
+	SAT,ATL
+###MAC: Save time by just taking the tail and not using cat first. 4/4
+
+4a.  Now extract the 17th and 18th fields from the entire file.  Pipe the results to the sort command, and then pipe those results to the uniq command (with a certain flag), to find out how many flights occurred between each pair of cities.
+
+	$ cat All_Years.txt | cut -d, -f17,18 | sort | uniq -c
+###MAC: Please include output. 3/4
+
+4b.  Same question as 4a, but now pipe the results to the sort command again, this time with a -n flag, to put the results into sorted order.
+
+	$ cat All_Years.txt | cut -d, -f17,18 | sort -n
+###MAC: Please include output. 3/4
+
+5a.  How many origin-to-destination pairs are there?
+	
+	$ cat All_Years.txt | cut -d, -f17,18 | sort | uniq -c | wc -l
+	8607
+###MAC: 4/4
+
+5b.  Which is the most popular origin-to-destination pair?
+
+	$ cat All_Years.txt | cut -d, -f17,18 | sort | uniq -c | sort -g | tail -n1
+	338472 SFO, LAX
+###MAC: 4/4
+	
+
+5c.  Which is the 100th most popular origin-to-destination pair?  (Hint: use tail with a flag that specifies 100 results, and then pipe the results to the head command.)
+
+	$ cat All_Years.txt | cut -d, -f17,18 | sort | uniq -c | sort -g | tail -n100 | head -n1
+	119452 ORD, 
+###MAC: Correct number, but what is the destination for the pair? 3/4
+
+6a.  For which origin-to-destination pair were there exactly 10000 flights from 1987 to 2008 ?
+
+	$ cat All_Years.txt | cut -d, -f17,18 | sort | uniq -c | grep -w "10000"
+	10000 DFW, GSP
+###MAC: 4/4
+	
+
+6b.  Which airplane flew exactly 10000 flights from 1987 to 2008 ?
+
+	$ cat All_Years.txt | cut -d, -f11 | sort | uniq -c | grep -w "10000"
+	N494CA
+###MAC: 4/4
+	
+
+7a.  Were there more flights arriving in ORD or departing from ORD ?
+	
+	#ORIGINS (departures)
+	$ cat All_Years.txt | cut -d, -f17 | grep -w "ORD" | wc -l
+	6597442
+
+	#DESTINATIONS (arrivals)
+	$ cat All_Years.txt | cut -d, -f18 | grep -w "ORD" | wc -l
+	6638035
+###MAC: Please make comparison (write a short sentence) between the number of flights arriving and departing so that you answer the question. 4/4
+
+7b.  Compare the number of flights from ORD to IND versus the number of flights from IND to ORD.
+	
+	# ORD to IND
+	$ cat All_Years.txt | cut -d, -f17,18 | grep -w "ORD.*IND" | wc -l
+	79334
+
+	# IND to ORD
+	$ cat All_Years.txt | cut -d, -f17,18 | grep -w "IND.*ORD" | wc -l
+	80498
+###MAC: 4/4
+
+
+8a.  Which airplane flew the greatest number of flights from 1987 to 2008 ?
+	
+	$ cat All_Years.txt | cut -d, -f11 | sort | uniq -c | sort -g | tail -n10
+  34344 N514
+  34394 N527
+  34474 N525
+  34519 N526
+  34526 N528
+  55349 000000
+ 139774 
+ 351056 0
+ 572299 UNKNOW
+37245646 NA
+###MAC: So which airplane flew the greatest number of flights? NA? UNKNOW? Please answer the question once you have the output. 3/4
+
+
+8b.  Use the supplemental data to discover who manufactured this airplane.
+
+	$ wget http://stat-computing.org/dataexpo/2009/plane-data.csv
+	$ cat plane-data.csv | cut -d, -f1,3 | grep "N528"
+	BOEING?
+###MAC: Part 8b was removed from the project. 
+
+9.  Use the supplemental data to make a listing of the total number of airports in each state.
+
+	$ wget http://stat-computing.org/dataexpo/2009/airports.csv
+	$ cat airports.csv | cut -d, -f4 | sort | uniq -c | grep -v "state\|NA" | grep \w*[A-Z]\w*[A-Z]\w*
+###MAC: Please provide output, at least the head. 3/4
+   
+
+10a.  Make a list of how many flights arrived at IND in each year.
+	
+	$ cat All_Years.txt | cut -d, -f1,18 | grep "IND" | uniq -c
+   8707 1987,IND
+  36961 1988,IND
+  40042 1989,IND
+  43437 1990,IND
+  42508 1991,IND
+  43111 1992,IND
+  37262 1993,IND
+  38250 1994,IND
+  37103 1995,IND
+  34182 1996,IND
+  35318 1997,IND
+  33816 1998,IND
+  34471 1999,IND
+  35268 2000,IND
+  37876 2001,IND
+  32592 2002,IND
+  41604 2003,IND
+  42102 2004,IND
+  43195 2005,IND
+  37629 2006,IND
+  43568 2007,IND
+  42732 2008,IND
+###MAC: 4/4
+
+
+10b.  Make a list of how many flights occurred during each month/year pair, e.g., how many in October 1987, how many in November 1987, etc.
+
+	$ cat All_Years.txt | cut -d, -f1,2 | sort | uniq -c
+###MAC: Please include output. 3/4
+
+
+11.  On which day of the week (Monday through Sunday) are people most likely to fly to ORD?
+	
+	$ cat All_Years.txt | cut -d, -f4,18 | grep -w "ORD" | sort | uniq -c | tail -n1
+	915345 7, ORD
+	SATURDAY
+###MAC: The answer is 3, Wednesday. You did not sort the final output so by adding “tail -n1” you narrowed the answers too soon. It sorted by day number (i.e. 7) instead of the number of flights. 2/4
+
+12.  During the years 2004 to 2008 (inclusive), which airplane has landed in Chicago O'Hare the largest number of times?
+
+	$ cat All_Years.txt | cut -d, -f1,11,18 | grep -w "ORD" | grep -w 200[4-8] | cut -d, -f2 | sort | uniq -c | tail -n1
+	89 N999DN
+###MAC: The answer is airplane N670AE that has landed 3742 times between 2004 and 2008. Cut the data down to the years 2004-2008 before searching for ORD. As a reality check in the future, doesn't 89 times seem low for the most number of times a plane has landed at ORD over 4 years? 2/4
+
+Broader questions:
+
+13. Do the seasons of the year significantly affect where people can fly?
+
+	# Count number of unique destinations flown to per season:
+
+	# WINTER
+	$ cat All_Years.txt | cut -d, -f2,18 | grep -w "12\|1\|2" | cut -d, -f2 | sort | uniq -c | wc -l
+	332
+
+	# SPRING
+	$ cat All_Years.txt | cut -d, -f2,18 | grep -w "3\|4\|5" | cut -d, -f2 | sort | uniq -c | wc -l
+	337
+
+	# SUMMER
+	$ cat All_Years.txt | cut -d, -f2,18 | grep -w "6\|7\|8" | cut -d, -f2 | sort | uniq -c | wc -l
+	342
+
+	# FALL
+	$ cat All_Years.txt | cut -d, -f2,18 | grep -w "9\|10\|11" | cut -d, -f2 | sort | uniq -c | wc -l
+	340
+	
+	# It appears the seasons of the year have a very small effect on the number of unique locations available to travel to.
+###MAC: I would suggest looking at the number of flights in each season as opposed to the number of unique destinations. Do flights into Alaska decrease or increase in the winter? 4/4
+
+
+14. How many of the flights in 1992 had nonnegative departure delay (i.e., did not depart early)?
+
+	$ cat 1992.csv | cut -d, -f16 | grep -v "-" | wc -l
+	3743719
+###MAC: 4/4
+
+###MAC: Fantastic job overall!
+	
+
